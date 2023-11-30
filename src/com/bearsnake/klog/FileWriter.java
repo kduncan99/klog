@@ -26,6 +26,7 @@ public class FileWriter extends Writer {
     ) {
         super(levelMask);
         setPrefixDelimiter(':');
+        addPrefixEntity(PrefixEntity.DATE_AND_TIME);
         addPrefixEntity(PrefixEntity.LOGGER_NAME);
         addPrefixEntity(PrefixEntity.LEVEL, PrefixEntityWidthSpecifier.FIXED, 5);
         addPrefixEntity(PrefixEntity.CATEGORY);
@@ -37,6 +38,18 @@ public class FileWriter extends Writer {
             System.err.println("Cannot create FileWriter for file " + fileName);
             _stream = null;
         }
+    }
+
+    /**
+     * Creates a new FileWriter with a level threshold value
+     * @param level indicates the level threshold for this writer
+     */
+    public FileWriter(
+        final Level level,
+        final String fileName,
+        final boolean buffered
+    ) {
+        this(new LevelMask(level), fileName, buffered);
     }
 
     @Override

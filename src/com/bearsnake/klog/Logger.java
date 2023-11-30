@@ -92,7 +92,13 @@ public class Logger {
      * @param writer the Writer object to be registered.
      * @return this object
      */
-    public Logger addWriter(final Writer writer) { _writers.add(writer); return this; }
+    public Logger addWriter(
+        final Writer writer
+    ) throws IOException {
+        _writers.add(writer);
+        writer.open(this);
+        return this;
+    }
 
     /**
      * Clears all categories from this Logger's list of accepted log categories.

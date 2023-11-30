@@ -118,25 +118,29 @@ public class Logger {
 
     public Logger catching(final Throwable t) {
         write(Level.ERROR, null, String.format("Catching %s", t));
-        write(Level.ERROR, null, Arrays.toString(t.getStackTrace()));
+        var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
+        write(Level.ERROR, null, arr);
         return this;
     }
 
     public Logger catching(final String category, final Throwable t) {
         write(Level.ERROR, category, String.format("Catching %s", t));
-        write(Level.ERROR, category, Arrays.toString(t.getStackTrace()));
+        var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
+        write(Level.ERROR, category, arr);
         return this;
     }
 
     public Logger throwing(final Throwable t) {
         write(Level.ERROR, null, String.format("Throwing %s", t));
-        write(Level.ERROR, null, Arrays.toString(t.getStackTrace()));
+        var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
+        write(Level.ERROR, null, arr);
         return this;
     }
 
     public Logger throwing(final String category, final Throwable t) {
         write(Level.ERROR, category, String.format("Throwing %s", t));
-        write(Level.ERROR, category, Arrays.toString(t.getStackTrace()));
+        var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
+        write(Level.ERROR, category, arr);
         return this;
     }
 

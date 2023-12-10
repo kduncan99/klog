@@ -13,10 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * The logger itself filters on two log entry attributes:
  *  1) All log entries are associated with a log level. The object contains a LevelMask which indicates which levels
  *  are to be allowed - if a given log entry does not match the LevelMask it is filtered out.
- *  2) Log entries *may* have a category value. Each Logger object may have a list of categories which are to be
- *  allowed through... If a log entry has a category, and the logger object's list of categories is not empty,
- *  and the logger object's list of categories does NOT contain an entry for the log entry's category, then the
- *  log entry is filtered out.
+ *  TODO - filters on class names and maybe methods
  * Any log entries which pass the filters listed above are routed to the registered Writer objects, which may
  * apply additional filtering, and which will format and persist any non-filtered log entries to the appropriate
  * destinations.
@@ -25,11 +22,10 @@ public class Logger {
 
     private LevelMask _levelMask;
     private final String _name;
-    private final ConcurrentLinkedQueue<String> _categories = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Writer> _writers = new ConcurrentLinkedQueue<>();
 
     /**
-     * Creates a new Logger with the given name, an empty category filter, no writers, and the default level mask value.
+     * Creates a new Logger with the given name, no writers, and the default level mask value.
      */
     public Logger(
         final String name
@@ -39,7 +35,7 @@ public class Logger {
     }
 
     /**
-     * Creates a new Logger with the given name, an empty category filter, no writers, and a specific level mask value.
+     * Creates a new Logger with the given name, no writers, and a specific level mask value.
      */
     public Logger(
         final String name,
@@ -50,8 +46,8 @@ public class Logger {
     }
 
     /**
-     * Creates a new Logger with the given name, an empty category filter, no writers, and a level mask value which
-     * represents all Levels at or above the specified Level priority.
+     * Creates a new Logger with the given name, no writers, and a level mask value which represents
+     * all Levels at or above the specified Level priority.
      */
     public Logger(
         final String name,
@@ -71,19 +67,7 @@ public class Logger {
     ) {
         _name = name;
         _levelMask = source._levelMask;
-        _categories.addAll(source._categories);
         _writers.addAll(source._writers);
-    }
-
-    /**
-     * Adds a category to this Logger's list of accepted log categories. Log entries with this category, or with
-     * no category, pass through this Logger's category filter.
-     * @param category A short case-sensitive string representing a log entry category
-     * @return this object
-     */
-    public Logger addCategory(final String category) {
-        _categories.add(category);
-        return this;
     }
 
     /**
@@ -93,25 +77,6 @@ public class Logger {
      * @return this object
      */
     public Logger addWriter(final Writer writer) { _writers.add(writer); return this; }
-
-    /**
-     * Clears all categories from this Logger's list of accepted log categories.
-     * @return this object
-     */
-    public Logger clearCategories() {
-        _categories.clear();
-        return this;
-    }
-
-    /**
-     * Clears a category from this Logger's list of accepted log categories.
-     * @param category A short case-sensitive string representing a log entry category
-     * @return this object
-     */
-    public Logger clearCategory(final String category) {
-        _categories.remove(category);
-        return this;
-    }
 
     /**
      * Causes close() to be invoked upon all Writer objects which are registered with this Logger.
@@ -146,18 +111,6 @@ public class Logger {
     }
 
     /**
-     * Causes open() to be invoked upon all Writer objects which are registered with this Logger.
-     * This is generally unnecessary, but it can be used to reverse the effect of invoking close() (above).
-     * @return this object
-     */
-    public Logger open() throws IOException {
-        for (Writer w : _writers) {
-            w.open(this);
-        }
-        return this;
-    }
-
-    /**
      * Replaces the current level mask with a new value representing all levels at or above
      * the given level in priority.
      * @param level the level to be used for establishing the new level mask
@@ -183,79 +136,16 @@ public class Logger {
     }
 
     /**
-     * Creates a debug log entry with the given message
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger debug(
-        final String message
-    ) {
-        return write(Level.DEBUG, null, message);
-    }
-
-    /**
-     * Creates a debug log entry with a category value and a message
-     * @param category category for the log entry
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger debug(
-        final String category,
-        final String message
-    ) {
-        return write(Level.DEBUG, category, message);
-    }
-
-    /**
      * Creates a debug log entry with a message formatter and parameters for the message
      * @param formatter Message formatter - if there are no parameters, this is just a message.
      * @param parameters parameters to be placed into the given message formatter
      * @return this object
      */
-    public Logger debugf(
+    public Logger debug(
         final String formatter,
         Object... parameters
     ) {
-        return write(Level.DEBUG, null, formatter, parameters);
-    }
-
-    /**
-     * Creates a debug log entry with a category value, a message formatter, and parameters for the message
-     * @param category category for the log entry
-     * @param formatter Message formatter - if there are no parameters, this is just a message.
-     * @param parameters parameters to be placed into the given message formatter
-     * @return this object
-     */
-    public Logger debugf(
-        final String category,
-        final String formatter,
-        Object... parameters
-    ) {
-        return write(Level.DEBUG, category, formatter, parameters);
-    }
-
-    /**
-     * Creates an error log entry with the given message
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger error(
-        final String message
-    ) {
-        return write(Level.ERROR, null, message);
-    }
-
-    /**
-     * Creates an error log entry with a category value and a message
-     * @param category category for the log entry
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger error(
-        final String category,
-        final String message
-    ) {
-        return write(Level.ERROR, category, message);
+        return write(Level.DEBUG, formatter, parameters);
     }
 
     /**
@@ -264,54 +154,11 @@ public class Logger {
      * @param parameters parameters to be placed into the given message formatter
      * @return this object
      */
-    public Logger errorf(
+    public Logger error(
         final String formatter,
         Object... parameters
     ) {
-        return write(Level.ERROR, null, formatter, parameters);
-    }
-
-    /**
-     * Creates an error log entry with a category value, a message formatter, and parameters for the message
-     * @param category category for the log entry
-     * @param formatter Message formatter - if there are no parameters, this is just a message.
-     * @param parameters parameters to be placed into the given message formatter
-     * @return this object
-     */
-    public Logger errorf(
-        final String category,
-        final String formatter,
-        Object... parameters
-    ) {
-        return write(Level.ERROR, category, formatter, parameters);
-    }
-
-    /**
-     * Creates a fatal log entry with the given message
-     * It should be noted that after a fatal log entry is processed, a RuntimeException is thrown.
-     * Thus, this method never really returns a value.
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger fatal(
-        final String message
-    ) {
-        return write(Level.FATAL, null, message);
-    }
-
-    /**
-     * Creates a fatal log entry with a category value and a message
-     * It should be noted that after a fatal log entry is processed, a RuntimeException is thrown.
-     * Thus, this method never really returns a value.
-     * @param category category for the log entry
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger fatal(
-        final String category,
-        final String message
-    ) {
-        return write(Level.FATAL, category, message);
+        return write(Level.ERROR, formatter, parameters);
     }
 
     /**
@@ -322,52 +169,11 @@ public class Logger {
      * @param parameters parameters to be placed into the given message formatter
      * @return this object
      */
-    public Logger fatalf(
+    public Logger fatal(
         final String formatter,
         Object... parameters
     ) {
-        return write(Level.FATAL, null, formatter, parameters);
-    }
-
-    /**
-     * Creates a fatal log entry with a category value, a message formatter, and parameters for the message
-     * It should be noted that after a fatal log entry is processed, a RuntimeException is thrown.
-     * Thus, this method never really returns a value.
-     * @param category category for the log entry
-     * @param formatter Message formatter - if there are no parameters, this is just a message.
-     * @param parameters parameters to be placed into the given message formatter
-     * @return this object
-     */
-    public Logger fatalf(
-        final String category,
-        final String formatter,
-        Object... parameters
-    ) {
-        return write(Level.FATAL, category, formatter, parameters);
-    }
-
-    /**
-     * Creates an info log entry with the given message
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger info(
-        final String message
-    ) {
-        return write(Level.INFO, null, message);
-    }
-
-    /**
-     * Creates an info log entry with a category value and a message
-     * @param category category for the log entry
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger info(
-        final String category,
-        final String message
-    ) {
-        return write(Level.INFO, category, message);
+        return write(Level.FATAL, formatter, parameters);
     }
 
     /**
@@ -376,50 +182,11 @@ public class Logger {
      * @param parameters parameters to be placed into the given message formatter
      * @return this object
      */
-    public Logger infof(
+    public Logger info(
         final String formatter,
         Object... parameters
     ) {
-        return write(Level.INFO, null, formatter, parameters);
-    }
-
-    /**
-     * Creates an info log entry with a category value, a message formatter, and parameters for the message
-     * @param category category for the log entry
-     * @param formatter Message formatter - if there are no parameters, this is just a message.
-     * @param parameters parameters to be placed into the given message formatter
-     * @return this object
-     */
-    public Logger infof(
-        final String category,
-        final String formatter,
-        Object... parameters
-    ) {
-        return write(Level.INFO, category, formatter, parameters);
-    }
-
-    /**
-     * Creates a trace log entry with the given message
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger trace(
-        final String message
-    ) {
-        return write(Level.TRACE, null, message);
-    }
-
-    /**
-     * Creates a trace log entry with a category value and a message
-     * @param category category for the log entry
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger trace(
-        final String category,
-        final String message
-    ) {
-        return write(Level.TRACE, category, message);
+        return write(Level.INFO, formatter, parameters);
     }
 
     /**
@@ -428,50 +195,11 @@ public class Logger {
      * @param parameters parameters to be placed into the given message formatter
      * @return this object
      */
-    public Logger tracef(
+    public Logger trace(
         final String formatter,
         Object... parameters
     ) {
-        return write(Level.TRACE, null, formatter, parameters);
-    }
-
-    /**
-     * Creates a trace log entry with a category value, a message formatter, and parameters for the message
-     * @param category category for the log entry
-     * @param formatter Message formatter - if there are no parameters, this is just a message.
-     * @param parameters parameters to be placed into the given message formatter
-     * @return this object
-     */
-    public Logger tracef(
-        final String category,
-        final String formatter,
-        Object... parameters
-    ) {
-        return write(Level.TRACE, category, formatter, parameters);
-    }
-
-    /**
-     * Creates a warning log entry with the given message
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger warning(
-        final String message
-    ) {
-        return write(Level.WARNING, null, message);
-    }
-
-    /**
-     * Creates a warning log entry with a category value and a message
-     * @param category category for the log entry
-     * @param message message to be logged
-     * @return this object
-     */
-    public Logger warning(
-        final String category,
-        final String message
-    ) {
-        return write(Level.WARNING, category, message);
+        return write(Level.TRACE, formatter, parameters);
     }
 
     /**
@@ -480,26 +208,11 @@ public class Logger {
      * @param parameters parameters to be placed into the given message formatter
      * @return this object
      */
-    public Logger warningf(
+    public Logger warning(
         final String formatter,
         Object... parameters
     ) {
-        return write(Level.WARNING, null, formatter, parameters);
-    }
-
-    /**
-     * Creates a warning log entry with a category value, a message formatter, and parameters for the message
-     * @param category category for the log entry
-     * @param formatter Message formatter - if there are no parameters, this is just a message.
-     * @param parameters parameters to be placed into the given message formatter
-     * @return this object
-     */
-    public Logger warningf(
-        final String category,
-        final String formatter,
-        Object... parameters
-    ) {
-        return write(Level.WARNING, category, formatter, parameters);
+        return write(Level.WARNING, formatter, parameters);
     }
 
     /**
@@ -510,24 +223,9 @@ public class Logger {
     public Logger catching(
         final Throwable t
     ) {
-        write(Level.ERROR, null, String.format("Catching %s", t));
+        write(Level.ERROR, String.format("Catching %s", t));
         var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
-        return write(Level.ERROR, null, arr);
-    }
-
-    /**
-     * Convenience method to create a set of error log entries describing a caught exception
-     * @param category category for the log entries
-     * @param t caught exception
-     * @return this object
-     */
-    public Logger catching(
-        final String category,
-        final Throwable t
-    ) {
-        write(Level.ERROR, category, String.format("Catching %s", t));
-        var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
-        return write(Level.ERROR, category, arr);
+        return writeMultiple(Level.ERROR, arr);
     }
 
     /**
@@ -539,46 +237,26 @@ public class Logger {
     public Logger throwing(
         final Throwable t
     ) {
-        write(Level.ERROR, null, String.format("Throwing %s", t));
+        write(Level.ERROR, String.format("Throwing %s", t));
         var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
-        return write(Level.ERROR, null, arr);
-    }
-
-    /**
-     * Convenience method to create a set of error log entries describing an exception which the client
-     * is preparing to throw.
-     * @param category category for the log entries
-     * @param t exception to be thrown
-     * @return this object
-     */
-    public Logger throwing(
-        final String category,
-        final Throwable t
-    ) {
-        write(Level.ERROR, null, String.format("Throwing %s", t));
-        var arr = Arrays.stream(t.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new);
-        return write(Level.ERROR, category, arr);
+        return writeMultiple(Level.ERROR, arr);
     }
 
     /**
      * Writes a log entry as directed by the given parameters.
      * If no parameters are needed, the message formatter is just a message string, and the parameters list is empty.
      * @param level indicates the level for the log entry
-     * @param category indicates the category of the log entry - null if no category
      * @param formatter a message formatter indicating the format of the message to be logged
      * @param parameters parameters which are used to fill in placeholders in the message formatter
      * @return this object
      */
     public Logger write(
         final Level level,
-        final String category,
         final String formatter,
         final Object... parameters
     ) {
         if (_levelMask.matches(level)) {
-            if (_categories.isEmpty() || _categories.contains(category)) {
-                _writers.forEach(w -> w.write(this, level, category, formatter, parameters));
-            }
+            _writers.forEach(w -> w.write(this, level, formatter, parameters));
         }
 
         if (level == Level.FATAL) {
@@ -591,17 +269,15 @@ public class Logger {
     /**
      * Writes a series of log entries as directed by the given parameters
      * @param level indicates the level for the log entries
-     * @param category indicates the category of the log entries - null if no category
      * @param messages an array of strings - one log entry is posted for each message
      * @return this object
      */
-    public Logger write(
+    public Logger writeMultiple(
         final Level level,
-        final String category,
         final String[] messages
     ) {
         if (_levelMask.matches(level)) {
-            _writers.forEach(w -> w.write(this, level, category, messages));
+            _writers.forEach(w -> w.writeMultiple(this, level, messages));
         }
 
         if (level == Level.FATAL) {
@@ -619,13 +295,13 @@ public class Logger {
      * Creates a multi-line log entry displaying the given buffer as a table of hex values, byte-by-byte.
      * @param level logging level
      * @param buffer buffer
-     * @return
+     * @return this object
      */
     public Logger writeBuffer(
         final Level level,
         final byte[] buffer
     ) {
-        return writeBuffer(level, null, null, buffer);
+        return writeBuffer(level, null, buffer);
     }
 
     /**
@@ -633,27 +309,10 @@ public class Logger {
      * @param level logging level
      * @param caption caption for the table - if null, no caption is emitted
      * @param buffer buffer
-     * @return
+     * @return this object
      */
     public Logger writeBuffer(
         final Level level,
-        final String caption,
-        final byte[] buffer
-    ) {
-        return writeBuffer(level, null, caption, buffer);
-    }
-
-    /**
-     * Creates a multi-line log entry displaying the given buffer as a table of hex values, byte-by-byte.
-     * @param level logging level
-     * @param category category
-     * @param caption caption for the table - if null, no caption is emitted
-     * @param buffer buffer
-     * @return
-     */
-    public Logger writeBuffer(
-        final Level level,
-        final String category,
         final String caption,
         final byte[] buffer
     ) {
@@ -681,6 +340,6 @@ public class Logger {
             strings[sx++] = sb.toString();
         }
 
-        return write(level, category, strings);
+        return writeMultiple(level, strings);
     }
 }

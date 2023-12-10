@@ -17,7 +17,6 @@ public class StdOutWriter extends Writer {
         setPrefixDelimiter(':');
         addPrefixEntity(PrefixEntity.LOGGER_NAME);
         addPrefixEntity(PrefixEntity.LEVEL, PrefixEntityWidthSpecifier.FIXED, 5);
-        addPrefixEntity(PrefixEntity.CATEGORY);
     }
 
     /**
@@ -31,7 +30,6 @@ public class StdOutWriter extends Writer {
         setPrefixDelimiter(':');
         addPrefixEntity(PrefixEntity.LOGGER_NAME);
         addPrefixEntity(PrefixEntity.LEVEL, PrefixEntityWidthSpecifier.FIXED, 5);
-        addPrefixEntity(PrefixEntity.CATEGORY);
     }
 
     @Override

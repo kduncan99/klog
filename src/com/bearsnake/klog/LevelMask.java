@@ -38,7 +38,7 @@ public class LevelMask {
     public LevelMask(
         final Level level
     ) {
-        _bitMask = (level.ordinal() << 1) - 1;
+        _bitMask = (1 << (level.ordinal() + 1)) - 1;
     }
 
     /**
@@ -128,6 +128,6 @@ public class LevelMask {
     public boolean matches(
         final Level level
     ) {
-        return (level.ordinal() & _bitMask) != 0;
+        return ((1 << level.ordinal()) & _bitMask) != 0;
     }
 }

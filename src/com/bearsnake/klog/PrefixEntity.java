@@ -8,7 +8,6 @@ package com.bearsnake.klog;
  * Indicates a particular datum to be included in the prefix of any log entry output.
  * {@link #LEVEL}
  * {@link #LOGGER_NAME}
- * {@link #CATEGORY}
  * {@link #DATE_AND_TIME}
  * {@link #SOURCE_PACKAGE}
  * {@link #SOURCE_CLASS}
@@ -26,11 +25,6 @@ public enum PrefixEntity {
      * The name associated with the logger which passed the log entry to the writer
      */
     LOGGER_NAME,
-
-    /**
-     * The category associated with the log entry
-     */
-    CATEGORY,
 
     /**
      * The date and time the log entry was created

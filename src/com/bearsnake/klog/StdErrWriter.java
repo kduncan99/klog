@@ -17,7 +17,6 @@ public class StdErrWriter extends Writer {
         setPrefixDelimiter(':');
         addPrefixEntity(PrefixEntity.LOGGER_NAME);
         addPrefixEntity(PrefixEntity.LEVEL, PrefixEntityWidthSpecifier.FIXED, 5);
-        addPrefixEntity(PrefixEntity.CATEGORY);
     }
 
     /**
@@ -27,11 +26,7 @@ public class StdErrWriter extends Writer {
     public StdErrWriter(
         final Level level
     ) {
-        super(new LevelMask(level));
-        setPrefixDelimiter(':');
-        addPrefixEntity(PrefixEntity.LOGGER_NAME);
-        addPrefixEntity(PrefixEntity.LEVEL, PrefixEntityWidthSpecifier.FIXED, 5);
-        addPrefixEntity(PrefixEntity.CATEGORY);
+        this(new LevelMask(level));
     }
 
     @Override

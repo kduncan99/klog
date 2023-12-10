@@ -142,54 +142,38 @@ public abstract class Writer {
     public void close(final Logger logger) throws IOException {}
 
     /**
-     * Indicates whether the writer is open. Default behavior is that the writer is always open.
-     */
-    public boolean isOpen() { return true; }
-
-    /**
-     * Opens this writer, which prepares it to write log entries to the destination.
-     * The default action is to do nothing.
-     * @param logger the logger which is invoking the method.
-     */
-    public void open(final Logger logger) throws IOException {}
-
-    /**
      * Presents a log entry to the writer.
      * @param logger the logger object which is invoking this
      * @param level level of the log entry
-     * @param category category of the log entry
      * @param formatter message formatter
      * @param parameters parameters to be inserted into the message formatter
      */
     public final synchronized void write(
         final Logger logger,
         final Level level,
-        final String category,
         final String formatter,
         final Object... parameters
     ) {
         if (_levelMask.matches(level)) {
-            var pfx = createPrefix(logger, level, category);
+            var pfx = createPrefix(logger, level);
             var text = pfx + " " + String.format(formatter, parameters);
             _write(text);
         }
     }
 
     /**
-     * Presents a set of log entries to the writer.
+     * Presents a set of log entries to the writer, to be written in one operation.
      * @param logger the logger object which is invoking this
      * @param level level of the log entry
-     * @param category category of the log entry
      * @param messages messages to be written
      */
-    public final synchronized void write(
+    public final synchronized void writeMultiple(
         final Logger logger,
         final Level level,
-        final String category,
         final String[] messages
     ) {
         if (_levelMask.matches(level)) {
-            var pfx = createPrefix(logger, level, category);
+            var pfx = createPrefix(logger, level);
             Arrays.stream(messages).map(msg -> pfx + " " + msg).forEach(this::_write);
         }
     }
@@ -212,8 +196,7 @@ public abstract class Writer {
      */
     private String createPrefix(
         final Logger logger,
-        final Level level,
-        final String category
+        final Level level
     ) {
         if (_prefixSpecifiers.isEmpty()) {
             return "";
@@ -230,7 +213,6 @@ public abstract class Writer {
             for (var pfxSpec : _prefixSpecifiers) {
                 String text = switch (pfxSpec._entity) {
                     case LEVEL -> level.toString();
-                    case CATEGORY -> category == null ? "" : category;
                     case LOGGER_NAME -> logger.getName();
                     case DATE_AND_TIME -> DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now());
                     case SOURCE_PACKAGE -> packageName;

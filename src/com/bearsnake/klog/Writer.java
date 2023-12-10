@@ -31,7 +31,7 @@ public abstract class Writer {
     }
 
     private char[] _prefixDelimiters = new char[]{' '};
-    protected LevelMask _levelMask = null;
+    protected LevelMask _levelMask;
     protected final List<PrefixSpec> _prefixSpecifiers = new LinkedList<>();
     protected String _spaces = "";
 

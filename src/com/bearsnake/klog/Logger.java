@@ -76,7 +76,12 @@ public class Logger {
      * @param writer the Writer object to be registered.
      * @return this object
      */
-    public Logger addWriter(final Writer writer) { _writers.add(writer); return this; }
+    public Logger addWriter(
+        final Writer writer
+    ) throws IOException {
+        _writers.add(writer);
+        return this;
+    }
 
     /**
      * Causes close() to be invoked upon all Writer objects which are registered with this Logger.

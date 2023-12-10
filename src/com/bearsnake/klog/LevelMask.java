@@ -12,12 +12,12 @@ public class LevelMask {
 
     public static final int ALL = 0x7FFFFFFF;
     public static final int NONE = 0x0;
-    public static final int DEBUG = (1 << Level.DEBUG.ordinal());
-    public static final int ERROR = (1 << Level.ERROR.ordinal());
-    public static final int FATAL = (1 << Level.FATAL.ordinal());
-    public static final int INFO = (1 << Level.INFO.ordinal());
-    public static final int WARNING = (1 << Level.WARNING.ordinal());
-    public static final int TRACE = (1 << Level.TRACE.ordinal());
+    public static final int DEBUG = Level.DEBUG.getBit();
+    public static final int ERROR = Level.ERROR.getBit();
+    public static final int FATAL = Level.FATAL.getBit();
+    public static final int INFO = Level.INFO.getBit();
+    public static final int WARNING = Level.WARNING.getBit();
+    public static final int TRACE = Level.TRACE.getBit();
 
     private int _bitMask = NONE;
 
@@ -38,7 +38,7 @@ public class LevelMask {
     public LevelMask(
         final Level level
     ) {
-        _bitMask = (1 << (level.ordinal() + 1)) - 1;
+        _bitMask = level.getPriorityBits();
     }
 
     /**
@@ -68,7 +68,7 @@ public class LevelMask {
     public LevelMask clearBit(
         final Level level
     ) {
-        return clearBits(1 << level.ordinal());
+        return clearBits(level.getBit());
     }
 
     /**
@@ -81,6 +81,10 @@ public class LevelMask {
     ) {
         _bitMask &= ~bitMask;
         return this;
+    }
+
+    public int getBitMask() {
+        return _bitMask;
     }
 
     /**
@@ -128,6 +132,6 @@ public class LevelMask {
     public boolean matches(
         final Level level
     ) {
-        return ((1 << level.ordinal()) & _bitMask) != 0;
+        return (level.getBit() & _bitMask) != 0;
     }
 }

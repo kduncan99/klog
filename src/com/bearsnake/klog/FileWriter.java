@@ -25,6 +25,7 @@ public class FileWriter extends Writer {
     ) {
         super(levelMask);
         setPrefixDelimiter(':');
+        addPrefixEntity(PrefixEntity.DATE_AND_TIME);
         addPrefixEntity(PrefixEntity.LOGGER_NAME);
         addPrefixEntity(PrefixEntity.LEVEL, PrefixEntityWidthSpecifier.FIXED, 5);
 

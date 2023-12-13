@@ -6,6 +6,8 @@ package com.bearsnake.klog;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -113,6 +115,22 @@ public class Logger {
      */
     public String getName() {
         return _name;
+    }
+
+    /**
+     * Retrieves a collection containing the writers currently assigned to this logger
+     */
+    public Collection<Writer> getWriters() { return new LinkedList<>(_writers); }
+
+    /**
+     * Removes a writer from the logger
+     * @param writer writer to be removed
+     * @return true if successful, false if the writer was not assigned to this logger
+     */
+    public boolean removeWriter(
+        final Writer writer
+    ) {
+        return _writers.remove(writer);
     }
 
     /**
